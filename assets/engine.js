@@ -182,7 +182,7 @@
   };
   var COPY = {
     "I grew up in": "I grew up in Belo Horizonte, Brazil, and moved to Philadelphia at 18 to study <b class=\"w\">international relations</b>. My first job was in India, interning at the social impact team of <b class=\"w\">the country’s largest garment manufacturer</b>. In NYC, I’ve done a bit of everything: consulting, modeling, and over 5 years of helping companies become <b class=\"w\">B Corps</b> — the highest global sustainability rating. In 2025, I founded JCVD as a laboratory of sorts.",
-    "JCVD is now a design": "JCVD is now a design studio — part sourcing agency, <b class=\"w\">part production manager, and wholeheartedly a connector</b>. Ultimately, I’m working to bring Brazil to the world, e o mundo de volta ao Brasil.<br><br>Bora nessa juntos?",
+    "JCVD is now a design": "JCVD is now a design studio — <b class=\"w\">part sourcing agency, part production manager, and wholeheartedly a connector</b>. Ultimately, I’m working to bring Brazil to the world, e o mundo de volta ao Brasil.<br><br>Bora nessa juntos?",
     "With a focus on": "With a focus on accessories, <b class=\"w\">I design products for the JCVD brand and for select global clients</b>. My design philosophy is shaped by Brazilian modernism, nature’s raw beauty, and contrasting textures. I call it ecobrutalista.",
     "Each one of my projects": "My projects explore the full life cycle of a product, <b class=\"w\">from design and production to partnerships and fulfillment</b>. My network spans Brazil, the U.S., and beyond, helping deliver solutions to creative and commercial challenges. My sweet spot is finding where a beautiful image meets an even better story — and sharing that story across the globe.<br><br><a class=\"go\" data-to=\"contact\"><u>Reach out</u></a> to explore custom projects.",
     "explore collections": "<u>Explore collections.</u>"
@@ -326,7 +326,7 @@
     else { nodes.forEach(function (nd) { nd.hidden = true; }); cum = cum.map(function () { return 0; }); }   // built page: plain scrolling
     var L = C.links, o = { align: "center" }, parts = [], y = 0;
     function t(html, gap) { var nd = mText(html, x, 0, w, o); parts.push([nd, y]); y += nd.n.offsetHeight + gap; }
-    t("Showroom appointments, custom projects and products, press:", 8);
+    t("Showrooms, appointments, custom projects and<br>products, press inquiries:", 8);
     t('<a href="mailto:' + L.email + '">' + L.email + '</a><br><a href="mailto:' + L.press + '">' + L.press + "</a>", M2.l);
     t('Marcas e produtores no Brasil:<br><a href="' + L.whatsapp + '" target="_blank" rel="noopener"><u>pode vir de zap</u></a>', M2.l);
     var row = [["icon-d4.png", 28, 28, L.instagram], ["icon-d5.png", 30, 27, L.linkedin], ["icon-wa.svg", 28, 28, L.whatsapp]], gapI = 24;
@@ -1309,8 +1309,8 @@
     clearInterval(carTimer);
     if (animate) {
       stage.classList.add("out");
-      setTimeout(function () { mount(r.scene, r); stage.classList.remove("out"); }, flying ? 520 : 260);
-    } else mount(r.scene, r);
+      clearTimeout(go_.t); go_.t = setTimeout(function () { mount(r.scene, r); stage.classList.remove("out"); }, flying ? 520 : 260);   // a newer click always wins
+    } else { clearTimeout(go_.t); mount(r.scene, r); }
     current = r.scene;
     var TT = { home: "", about: "About", projects: "Projects", products: "Products", contact: "Contact", policies: "Policies", partners: "Partner products" };
     var t = r.soon ? "Shop coming soon" : r.scene === "case" || r.scene === "case2" ? C.cases[r.i] && C.cases[r.i].title : TT[r.scene] !== undefined ? TT[r.scene] : r.scene === "e404" ? "Page not found" : "";
@@ -1374,9 +1374,10 @@
   layout(); drawCart(); go_(false);
   /* first load of Home: background, then J, C, V, D, then the sentence, then the menu, each after the previous has loaded */
   (function intro() {
-    if (current !== "home") return;
+    var boot = function () { document.documentElement.classList.remove("boot"); };
+    if (current !== "home") { boot(); return; }
     var b = document.body, tiles = $$(".tile", tilesBox);
-    b.classList.add("intro");
+    b.classList.add("intro"); requestAnimationFrame(boot);   // nothing of the logo shows before its intro starts
     var wait = function (src) { return new Promise(function (r) { var i = new Image(); i.onload = i.onerror = function () { r(); }; i.src = src; if (i.complete) r(); }); };
     var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
     var BEAT = 400;   // one steady beat between every element
