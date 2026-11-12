@@ -13,7 +13,9 @@
 html, body { margin: 0; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }   /* iOS: no automatic text enlargement, so captions and body render at the same 15px */
 body { background: var(--stone); color: var(--ink); font-family: var(--sans); font-weight: 300; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-#ground { position: fixed; inset: 0; z-index: -1; background: var(--stone) url("img/stone.jpg") center / cover no-repeat; }
+#ground { position: fixed; inset: 0; z-index: -1; }
+/* the wall: one tall seamless stone strip that slides up as the page scrolls (ground and veils move together) */
+#ground, .veil { background: var(--stone) url("img/stone.jpg") center var(--gy, 0px) / var(--gw, max(100vw, 1300px)) auto repeat-y; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 b { font-weight: 300; }   /* everything Light for now */
@@ -24,7 +26,7 @@ u { text-decoration-thickness: 1px; text-underline-offset: 2px; }
 #stage { overflow: hidden; z-index: 1; transition: opacity .35s; }
 /* veils: copies of the stone ground laid over the scrolling stage, revealed only where the
    menu / header / footer sit, so text slides underneath them and disappears */
-.veil { position: fixed; inset: 0; z-index: 2; pointer-events: none; background: var(--stone) url("img/stone.jpg") center / cover no-repeat; opacity: 0; transition: opacity .35s; }
+.veil { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity .35s; }
 .veil.on { opacity: 1; }
 #veilTop { -webkit-mask-image: linear-gradient(#000 var(--a, 0px), transparent var(--b, 0px)); mask-image: linear-gradient(#000 var(--a, 0px), transparent var(--b, 0px)); }
 #veilBot { -webkit-mask-image: linear-gradient(transparent var(--a, 100vh), #000 var(--b, 100vh)), linear-gradient(90deg, #000 var(--c, 100vw), transparent var(--d, 100vw)); mask-image: linear-gradient(transparent var(--a, 100vh), #000 var(--b, 100vh)), linear-gradient(90deg, #000 var(--c, 100vw), transparent var(--d, 100vw)); -webkit-mask-composite: source-in; mask-composite: intersect; }
@@ -149,10 +151,14 @@ html:has(body.home.is-m) { overflow: hidden; height: 100%; }
 .dropmenu { padding: 14px 0; border-radius: 3px; box-shadow: 0 2px 14px rgba(40,36,32,.08); transition: opacity .35s; }
 /* home: first visit loads in order: background, J, C, V, D, sentence, menu */
 #ground, #tiles .tile, #stage, #menu { transition-property: opacity, transform; }
-body.intro #ground { opacity: 0; transition: opacity .6s; }
+body.intro #ground { opacity: 0; transition: opacity .9s cubic-bezier(.33,0,.2,1); }
 body.intro #tiles .tile:not(.in), body.intro #menu:not(.in) { opacity: 0 !important; }
 body.intro #stage:not(.in) { opacity: 0; }
 #tiles .tile.in, #menu.in, #stage.in { transition: opacity .55s, transform .9s var(--ease); }
+body.intro #stage.in { transition: opacity .8s cubic-bezier(.33,0,.2,1); }
+body.intro #menu .mn { opacity: 0; transition: opacity .6s cubic-bezier(.33,0,.2,1); }
+body.intro #menu.in .mn { opacity: 1; }
+body.intro #menu.in .mn:nth-child(2) { transition-delay: .1s; } body.intro #menu.in .mn:nth-child(3) { transition-delay: .2s; } body.intro #menu.in .mn:nth-child(4) { transition-delay: .3s; }
 
 /* paper card: warm off-white sheet with fibre grain, lifted a few mm off the wall */
 .paper {
@@ -173,3 +179,11 @@ body.cart-open #cart { visibility: visible; transition: transform .5s var(--ease
 /* phone subpages: finger-sized hit area on the logo */
 #tiles.small .tile::after { content: ""; position: absolute; inset: -130px -8px; }
 #casenav button { position: relative; } #casenav button::after { content: ""; position: absolute; inset: -9px -8px; }
+
+/* intro: letter shape first, then the whole carved tile */
+#tiles .tile img.lm { opacity: 0; transform: translateY(14px); -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; transition: opacity .75s cubic-bezier(.33,0,.2,1), transform .9s cubic-bezier(.22,.61,.36,1); pointer-events: none; }
+body.intro #tiles .tile.in img.lm { opacity: 1; transform: none; }
+body.intro #tiles .tile img:not(.s):not(.lm) { opacity: 0; transition: opacity .9s cubic-bezier(.33,0,.2,1); }
+body.intro.intro-full #tiles .tile img:not(.s):not(.lm) { opacity: 1; }
+body.intro.intro-full #tiles .tile img.lm { opacity: 0; transition: opacity .9s cubic-bezier(.33,0,.2,1) .15s; }
+body.intro #tiles .tile:not(.in) { opacity: 1 !important; }

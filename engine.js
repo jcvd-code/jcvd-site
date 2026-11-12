@@ -678,14 +678,20 @@
     $$("[data-to]", nd.n).forEach(function (a) { a.addEventListener("click", function (ev) { ev.stopPropagation(); nav(a.dataset.to); }); });
     markCurrent(nd.n);
   }
+  /* clean URLs (jcvd.com.br/products) on the real site; #products inside the claude.ai preview, where paths can't be served */
+  var PATHS = document.documentElement.getAttribute("data-routing") === "path";
+  function here_() { return PATHS ? location.pathname.replace(/^\/+|\/+$/g, "") || "home" : location.hash.replace(/^#/, ""); }
+  if (PATHS && location.pathname.length > 1 && /\/$/.test(location.pathname)) history.replaceState(null, "", location.pathname.replace(/\/+$/, "") + location.search);
+  if (PATHS && location.hash.length > 1) history.replaceState(null, "", "/" + (location.hash.slice(1) === "home" ? "" : location.hash.slice(1)));   // old #links keep working
   function markCurrent(root) {
-    var h = location.hash.replace(/^#/, ""), here = h;
+    var h = here_(), here = h;
     if (/^product-/.test(h)) { var p = C.products[h.slice(8)]; if (p) here = collOf(p).to; }
     $$("[data-to]", root).forEach(function (a) { a.style.fontWeight = a.dataset.to === here ? 400 : 300; a.style.color = a.dataset.to === here ? "#111" : ""; });
   }
   function nav(to) {
     if (to.indexOf("http") === 0 || to.indexOf("mailto") === 0) { window.open(to, "_blank", "noopener"); return; }
     if (to.indexOf("state:") === 0) { animateState(to.slice(6)); return; }
+    if (PATHS) { var u = "/" + (to === "home" ? "" : to); if (u !== location.pathname) { history.pushState(null, "", u); go_(true); } return; }
     location.hash = to;
   }
   var COLL_LINKS = { "003 - INVERNO ‘26": "c-inverno-2026", "002 - OUTONO ‘26": "c-outono-2026", "001 - PRIMAVERA ‘26": "c-primavera-2026", "Arewà Basit": "p-arewa", "002 - OUTONO 2026": "c-outono-2026", "001 - PRIMAVERA 2026": "c-primavera-2026", "001 PRIMAVERA 2026": "c-primavera-2026", "PARTNER PRODUCTS": "partners", "JCVD x AREWÀ": "p-arewa", "eie.": "p-eie", "JCVD PRODUCTS": "products", "POLICIES": "policies", "PRODUCTS": "products", "INSTAGRAM - EMAIL": "", "EXPLORE PROJECTS": "projects" };
@@ -1291,7 +1297,7 @@
     return { scene: "e404" };
   }
   function go_(animate) {
-    var h = location.hash.replace(/^#/, ""), r = parse(h);
+    var h = here_(), r = parse(h);
     if (r.scene === "projects" && /^case/.test(current || "")) { r.toCases = true; r.caseIdx = lastCase; }   // closing a case study lands back on the case studies
     var wasHome = current === "home", isHome = r.scene === "home";
     document.body.className = [isHome ? "home" : "", r.shop ? "shop" : "", r.partnerOn ? "partner" : "", r.pdp ? "pdp" : "", mode === "m" ? "is-m" : ""].join(" ");
@@ -1313,7 +1319,18 @@
     h1.textContent = t || "JCVD is a sustainable design studio with one foot in Brooklyn and the other in Brazil.";
     setTimeout(render, 950);   // re-measure the veils once the menu has settled
   }
-  window.addEventListener("hashchange", function () { go_(true); });
+  window.addEventListener("hashchange", function () { if (!PATHS) go_(true); });
+  window.addEventListener("popstate", function () { if (PATHS) go_(true); });
+  if (PATHS) $$("#menu a").forEach(function (a) { var k = a.getAttribute("href").replace(/^#/, ""); a.setAttribute("href", "/" + k);
+    a.addEventListener("click", function (ev) { if (ev.metaKey || ev.ctrlKey || ev.shiftKey) return; ev.preventDefault(); nav(k); }); });
+  /* the wall slides up as you scroll, a little slower than the page, like moving down along it */
+  (function () {
+    var root = document.documentElement.style, raf = 0;
+    function wall() { raf = 0; var w = Math.max(window.innerWidth, 1300), period = w * 2400 / 1920;
+      root.setProperty("--gw", w + "px"); root.setProperty("--gy", (-(window.scrollY * 0.7) % period) + "px"); }
+    window.addEventListener("scroll", function () { if (!raf) raf = requestAnimationFrame(wall); }, { passive: true });
+    window.addEventListener("resize", wall); wall();
+  })();
   /* back / forward with a two-finger sideways swipe (the preview frame swallows the browser's own gesture),
      plus the Backspace key outside form fields */
   (function () {
@@ -1332,7 +1349,7 @@
       acc += e.deltaX; show(acc);
       if (Math.abs(acc) > 140) {
         fired = true; hint.style.opacity = 0;
-        var cm = /^case-(\d)$/.exec(location.hash.replace(/^#/, ""));
+        var cm = /^case-(\d)$/.exec(here_());
         if (cm && mode === "d") nav("case-" + ((+cm[1] + (acc < 0 ? -1 : 1) + C.cases.length) % C.cases.length));
         else if (window.top !== window.self) { if (acc < 0) history.back(); else history.forward(); }
       }
@@ -1347,7 +1364,7 @@
   })();
   var rt;
   function onResize() { clearTimeout(rt); rt = setTimeout(function () { var m0 = mode; layout(); if (m0 !== mode) go_(false); else {
-    menuPose(current === "home", (parse(location.hash.replace(/^#/, "")).nav || current)); logoPose(current === "home", false);
+    menuPose(current === "home", (parse(here_()).nav || current)); logoPose(current === "home", false);
     if (current === "home" && mode === "m") { window.scrollTo(0, 0); nodes.forEach(function (nd) { nd.dy = HOME_SENT !== null && nd.e.k === "text" ? HOME_SENT - nd.e.f[0].g.y : HOMEDY; }); }
     render(); } }, 120); }
   window.addEventListener("resize", onResize);
@@ -1362,10 +1379,15 @@
     b.classList.add("intro");
     var wait = function (src) { return new Promise(function (r) { var i = new Image(); i.onload = i.onerror = function () { r(); }; i.src = src; if (i.complete) r(); }); };
     var sleep = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
-    var chain = wait("assets/img/stone.jpg").then(function () { $("#ground").style.opacity = 1; return sleep(380); });
-    tiles.forEach(function (t) { chain = chain.then(function () { return wait($("img", t).src); }).then(function () { t.classList.add("in"); return sleep(260); }); });
-    chain.then(function () { stage.classList.add("in"); return sleep(320); })
-      .then(function () { $("#menu").classList.add("in"); return sleep(700); })
-      .then(function () { b.classList.remove("intro"); $("#ground").style.opacity = ""; });
+    var BEAT = 400;   // one steady beat between every element
+    var chain = wait("assets/img/stone.jpg").then(function () { $("#ground").style.opacity = 1; return sleep(BEAT + 200); });
+    // each letter arrives as just its letter shape (the flat logo), drifting up into place on the beat; then the carved tiles settle in around them
+    tiles.forEach(function (t) { var lm = new Image(); lm.className = "lm"; lm.alt = ""; lm.src = $("img", t).src;
+      lm.style.webkitMaskImage = lm.style.maskImage = "url(assets/logo/" + t.dataset.k + "-m.png)"; t.appendChild(lm); });
+    tiles.forEach(function (t) { chain = chain.then(function () { return Promise.all([wait($("img", t).src), wait("assets/logo/" + t.dataset.k + "-m.png")]); }).then(function () { t.classList.add("in"); return sleep(BEAT); }); });
+    chain = chain.then(function () { return sleep(BEAT * 0.4); }).then(function () { b.classList.add("intro-full"); return sleep(BEAT * 1.2); });
+    chain.then(function () { stage.classList.add("in"); return sleep(BEAT * 1.1); })
+      .then(function () { $("#menu").classList.add("in"); return sleep(1000); })
+      .then(function () { b.classList.remove("intro", "intro-full"); $("#ground").style.opacity = ""; $$(".tile .lm", tilesBox).forEach(function (n) { n.remove(); }); });
   })();
 })();
