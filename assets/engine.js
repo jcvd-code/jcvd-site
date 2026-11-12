@@ -828,7 +828,7 @@
     var g = currentG(box);
     var f = document.createElement("form"); f.className = "catform"; f.noValidate = true;
     f.style.cssText = "left:18px;top:0;right:18px;bottom:0;font-size:" + (mode === "d" ? 14 : 10) + "px;gap:" + (mode === "d" ? 14 : 10) + "px";
-    f.innerHTML = '<label for="f-name">Name <input id="f-name" autocomplete="name"></label><label for="f-company">Company <input id="f-company" autocomplete="organization"></label><label for="f-email">Email <input id="f-email" type="email" autocomplete="email"></label><input class="hp" tabindex="-1" aria-hidden="true" name="website"><button class="send" type="submit">SEND ME THE CATALOG →</button><p class="err" hidden></p>';
+    f.t0 = performance.now(); f.innerHTML = '<label for="f-name">Name <input id="f-name" autocomplete="name"></label><label for="f-company">Company <input id="f-company" autocomplete="organization"></label><label for="f-email">Email <input id="f-email" type="email" autocomplete="email"></label><input class="hp" tabindex="-1" aria-hidden="true" name="jcvd_x9" autocomplete="off" data-lpignore="true" data-1p-ignore><button class="send" type="submit">SEND ME THE CATALOG →</button><p class="err" hidden></p>';
     var cx = document.createElement("button"); cx.type = "button"; cx.className = "catx"; cx.setAttribute("aria-label", "Close"); cx.textContent = "×";
     cx.addEventListener("click", function (ev) { ev.preventDefault(); ev.stopPropagation(); f.remove(); texts.forEach(function (nd) { nd.hidden = false; }); render(); });
     f.appendChild(cx);
@@ -837,7 +837,7 @@
       ev.preventDefault();
       var n = $("#f-name").value.trim(), m = $("#f-email").value.trim();
       if (!n || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)) { var er = $(".err", f); er.hidden = false; er.textContent = "Add your name and a valid email."; return; }
-      if ($(".hp", f).value) return;   // bots fill the hidden field
+      if ($(".hp", f).value && performance.now() - f.t0 < 1500) return;   // only a bot fills the hidden field within a second (browser autofill can touch it too, so it alone never blocks a person)
       var btn = $(".send", f); btn.disabled = true; btn.textContent = "sending…";
       var done = function () { f.outerHTML = '<div class="catdone" style="inset:0">Catalog sent! Check your inbox :)</div>'; };
       var url = C.links.catalogEndpoint;
