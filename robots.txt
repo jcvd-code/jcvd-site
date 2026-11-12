@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.jcvd.com.br/sitemap.xml
