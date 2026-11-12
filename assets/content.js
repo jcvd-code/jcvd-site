@@ -2,7 +2,7 @@
    a theme-editor section (studio copy, case studies) or Shopify data
    (products, collections, partner colours, piece positions). */
 window.JCVD = {
-  links: { instagram: "https://www.instagram.com/jcvd______________/", email: "joao@jcvd.com.br", press: "press@jcvd.com.br", blog: "https://impactado.substack.com/", whatsapp: "https://wa.me/12674415390", catalogEndpoint: "https://script.google.com/macros/s/AKfycbzXF4InHCYm1X0MEjCVFQC6Im2epb8s-hdAHnJvOfWTHjJeuk8sC3pDEwhw1M14ZM5B/exec", linkedin: "https://www.linkedin.com/in/joaocamposd/" },
+  links: { instagram: "https://www.instagram.com/jcvd______________/", email: "joao@jcvd.com.br", press: "press@jcvd.com.br", blog: "https://impactado.substack.com/", whatsapp: "https://wa.me/12674415390", catalogEndpoint: "https://script.google.com/macros/s/AKfycbyeMPxFmI2t8lLBQPHLVJCkN0YWs6-BzGNNXAb51m2dd47KQqvWUkjq1iAduCcio3En/exec", linkedin: "https://www.linkedin.com/in/joaocamposd/" },
 
   pastWork: [
     ["logo-shahi.webp", "https://www.shahi.co.in"], ["logo-carhartt.webp", "https://www.carhartt.com"], ["logo-edl.webp", "https://www.emilydawnlong.com"],
